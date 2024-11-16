@@ -1,0 +1,47 @@
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Sample dataset
+data = {
+    'email': [
+        "Win a $1000 gift card now!",
+        "Important meeting tomorrow at 10 AM",
+        "Limited offer! Claim your prize.",
+        "Don't forget our lunch meeting.",
+        "Congratulations, you've won a lottery!"
+    ],
+    'label': [1, 0, 1, 0, 1]  # 1: spam, 0: not spam
+}
+
+# Convert to DataFrame
+df = pd.DataFrame(data)
+
+# Text preprocessing: Convert email text into TF-IDF features
+vectorizer = TfidfVectorizer(stop_words="english", max_features=100)
+X = vectorizer.fit_transform(df['email']).toarray()
+
+# Labels
+y = df['label']
+
+# Split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train a logistic regression model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Test with a new email
+new_email = ["Exclusive deal just for you!"]
+new_email_features = vectorizer.transform(new_email).toarray()
+prediction = model.predict(new_email_features)
+print("Prediction:", "Spam" if prediction[0] == 1 else "Not Spam")
